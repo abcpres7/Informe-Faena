@@ -1,3 +1,4 @@
+
 import streamlit as st
 import streamlit.components.v1 as components
 
@@ -8,7 +9,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Bloque 1 de la interfaz HTML y estilos
+# Estructura limpia y robusta para Streamlit
 part1 = """
 <!DOCTYPE html>
 <html lang="es">
@@ -37,20 +38,40 @@ part1 = """
     </script>
     <style>
         body { font-family: 'Inter', sans-serif; }
-        @media print {
-            .no-print { display: none !important; }
-            body { background: white !important; margin: 0; padding: 0; }
-            .print-page { box-shadow: none !important; border: none !important; width: 100% !important; max-width: 100% !important; margin: 0 !important; padding: 10mm !important; page-break-after: always; }
-            .avoid-break { page-break-inside: avoid !important; break-inside: avoid !important; }
-            .force-page-break { page-break-before: always !important; break-before: page !important; }
+        
+        /* Contenedor A4 Estricto */
+        .page-a4 {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 10mm;
+            margin: 0 auto;
+            background: white;
+            box-sizing: border-box;
         }
-        .pdf-render-mode { width: 794px !important; box-sizing: border-box !important; }
-        .avoid-break { page-break-inside: avoid !important; break-inside: avoid !important; }
-        .force-page-break { page-break-before: always !important; break-before: page !important; }
+
+        .pdf-render-mode {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            margin: 0 !important;
+            width: 210mm !important;
+            box-sizing: border-box !important;
+        }
+
+        .avoid-break {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+        }
+
+        .force-page-break {
+            page-break-before: always !important;
+            break-before: page !important;
+        }
     </style>
 </head>
 <body class="bg-industrialBg text-slate-800 antialiased min-h-screen flex flex-col justify-between" x-data="reportApp()">
 
+    <!-- Header Principal -->
     <header class="no-print bg-petroleum text-white shadow-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-3">
             <div class="flex items-center space-x-3">
@@ -76,6 +97,7 @@ part1 = """
         </div>
     </header>
 
+    <!-- Notificación flotante -->
     <div x-show="notification" x-transition class="no-print fixed bottom-5 right-5 z-50 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center space-x-3 border-l-4 border-corporate">
         <i class="fa-solid fa-circle-check text-corporate text-lg"></i>
         <span class="text-xs sm:text-sm font-medium" x-text="notificationText"></span>
@@ -83,6 +105,7 @@ part1 = """
 
     <main class="max-w-7xl mx-auto px-2 sm:px-4 py-6 w-full flex-grow">
         
+        <!-- VISTA 1: FORMULARIO -->
         <div x-show="activeTab === 'editor'" class="no-print space-y-6">
             
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-6">
@@ -122,7 +145,7 @@ part1 = """
                             <i class="fa-solid fa-users text-corporate"></i>
                             <span>Dotación Total / Personal Asignado en Turno</span>
                         </label>
-                        <input type="text" x-model="header.workforce" placeholder="Ej: 12 Personas (2 Operadores, 1 Supervisor, 9 Aseo)" class="w-full text-xs sm:text-sm border border-slate-300 rounded-lg p-2.5 bg-white focus:ring-2 focus:ring-corporate focus:outline-none">
+                        <input type="text" x-model="header.workforce" placeholder="Ej: 14 Personas (4 Operadores, 2 Cargador, 7 Aseo, 1 APR)" class="w-full text-xs sm:text-sm border border-slate-300 rounded-lg p-2.5 bg-white focus:ring-2 focus:ring-corporate focus:outline-none">
                     </div>
                 </div>
                 <div class="mt-4">
@@ -131,6 +154,7 @@ part1 = """
                 </div>
             </div>
 
+            <!-- 2. Equipos -->
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-6">
                 <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
                     <h2 class="text-sm sm:text-base font-bold text-petroleum flex items-center space-x-2">
@@ -173,6 +197,7 @@ part1 = """
                 </div>
             </div>
 
+            <!-- 3. Actividades -->
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-6">
                 <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
                     <h2 class="text-sm sm:text-base font-bold text-petroleum flex items-center space-x-2">
@@ -209,6 +234,7 @@ part1 = """
                 </div>
             </div>
 
+            <!-- 4. Instalaciones -->
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-6">
                 <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
                     <h2 class="text-sm sm:text-base font-bold text-petroleum flex items-center space-x-2">
@@ -249,6 +275,7 @@ part1 = """
                 </div>
             </div>
 
+            <!-- 5. Anexo Fotográfico -->
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-6">
                 <div class="flex flex-wrap items-center justify-between gap-2 pb-3 mb-4 border-b border-slate-100">
                     <div>
@@ -317,17 +344,18 @@ part1 = """
         </div>
 """
 
-# Bloque 2 de la interfaz HTML, Vista previa PDF y Lógica JavaScript
 part2 = """
+        <!-- VISTA PREVIA Y PDF -->
         <div class="flex justify-center w-full overflow-x-auto">
-            <div id="full-report-container" class="bg-white p-6 shadow-2xl border border-slate-300 text-slate-900 text-xs my-2 print-page" style="width: 210mm; min-h: 297mm; box-sizing: border-box;">
+            <div id="full-report-container" class="page-a4 shadow-2xl border border-slate-300 text-slate-900 text-xs my-2">
                 
+                <!-- PÁGINA 1 -->
                 <div class="flex flex-col justify-between min-h-[265mm]">
                     <div>
                         <div class="border-2 border-slate-800 mb-3 grid grid-cols-12 text-center">
                             <div class="col-span-4 border-r-2 border-slate-800 p-2 flex items-center justify-center bg-slate-50">
                                 <div>
-                                    <span class="font-extrabold text-xs sm:text-sm tracking-wider text-slate-900 uppercase block" x-text="header.company"></span>
+                                    <span class="font-extrabold text-xs tracking-wider text-slate-900 uppercase block" x-text="header.company"></span>
                                     <span class="text-[8px] text-slate-500 font-bold">SISTEMA INTEGRADO DE GESTIÓN</span>
                                 </div>
                             </div>
@@ -353,6 +381,7 @@ part2 = """
                             </div>
                         </div>
 
+                        <!-- Equipos -->
                         <div class="mb-3 avoid-break">
                             <div class="bg-slate-800 text-white font-bold px-3 py-1 text-[10px] uppercase tracking-wide mb-1">1. Equipos y Maquinaria en Turno</div>
                             <table class="w-full border-collapse border border-slate-400 text-[9px]">
@@ -390,6 +419,7 @@ part2 = """
                             NOTA: <span class="font-normal" x-text="header.note"></span>
                         </div>
 
+                        <!-- Actividades -->
                         <div class="mb-3 avoid-break">
                             <div class="bg-slate-800 text-white font-bold px-3 py-1 text-[10px] uppercase tracking-wide mb-1">2. Actividades Realizadas</div>
                             <table class="w-full border-collapse border border-slate-400 text-[9px]">
@@ -414,6 +444,7 @@ part2 = """
                             </table>
                         </div>
 
+                        <!-- Instalaciones -->
                         <div class="mb-3 avoid-break">
                             <div class="bg-slate-800 text-white font-bold px-3 py-1 text-[10px] uppercase tracking-wide mb-1">3. Estado de Instalaciones de Faena / Sala de Cambio</div>
                             <table class="w-full border-collapse border border-slate-400 text-[9px]">
@@ -445,6 +476,7 @@ part2 = """
 
                 <div class="force-page-break pt-4"></div>
 
+                <!-- PÁGINA 2 -->
                 <div class="flex flex-col justify-between min-h-[265mm]">
                     <div>
                         <div class="border-2 border-slate-800 mb-4 grid grid-cols-12 bg-slate-50 text-center">
@@ -577,26 +609,34 @@ part2 = """
                 },
 
                 exportPDF() {
-                    this.showNotification('Generando PDF completo de alta calidad...');
+                    this.showNotification('Generando PDF sin recortes...');
                     const element = document.getElementById('full-report-container');
-                    const originalClass = element.className;
+                    
+                    // Forzar posición cero y renderizado A4 limpio
                     element.classList.add('pdf-render-mode');
 
                     const opt = {
-                        margin: [8, 8, 8, 8],
-                        filename: `Informe_Turno_${this.header.date}.pdf`,
-                        image: { type: 'jpeg', quality: 0.98 },
-                        html2canvas: { scale: 2, useCORS: true, logging: false, scrollY: 0, windowWidth: 1024 },
-                        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                        pagebreak: { mode: ['css', 'legacy'] }
+                        margin:       0,
+                        filename:     `Informe_Turno_${this.header.date}.pdf`,
+                        image:        { type: 'jpeg', quality: 0.98 },
+                        html2canvas:  { 
+                            scale: 2, 
+                            useCORS: true, 
+                            logging: false, 
+                            scrollX: 0, 
+                            scrollY: 0,
+                            windowWidth: 794 // 210mm a 96 DPI exacta
+                        },
+                        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                        pagebreak:    { mode: ['css', 'legacy'] }
                     };
 
                     html2pdf().set(opt).from(element).save().then(() => {
-                        element.className = originalClass;
-                        this.showNotification('¡PDF descargado con éxito sin recortes!');
+                        element.classList.remove('pdf-render-mode');
+                        this.showNotification('¡PDF generado correctamente!');
                     }).catch(err => {
-                        element.className = originalClass;
-                        console.error('Error generando PDF:', err);
+                        element.classList.remove('pdf-render-mode');
+                        console.error('Error al generar PDF:', err);
                         this.showNotification('Error al exportar.');
                     });
                 }
@@ -607,12 +647,11 @@ part2 = """
 </html>
 """
 
-# Unir las dos partes de forma segura en un archivo HTML local
+# Generación dinámica sin archivos sueltos
 with open("index.html", "w", encoding="utf-8") as f:
     f.write(part1)
     f.write(part2)
 
-# Leer y renderizar el archivo integrado en Streamlit
 with open("index.html", "r", encoding="utf-8") as f:
     html_code = f.read()
 
