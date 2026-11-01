@@ -8,16 +8,15 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-part1 = """
+html_code = """
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador de Informes Técnicos - Industrial Pro</title>
+    <title>Informe Técnico de Turno - Industrial Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
@@ -35,19 +34,43 @@ part1 = """
         }
     </script>
     <style>
+        * { box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; }
         
-        /* Estilos de Impresión Oficial A4 */
+        /* Configuración de Impresión PDF Impecable */
         @media print {
-            .no-print { display: none !important; }
-            body { background: white !important; margin: 0 !important; padding: 0 !important; }
-            .page-a4 {
-                box-shadow: none !important;
-                border: none !important;
-                width: 100% !important;
-                max-width: 100% !important;
+            @page {
+                size: A4 portrait;
+                margin: 0mm !important; /* Elimina marcas de agua, URLs y fechas del navegador */
+            }
+            html, body {
+                background: #ffffff !important;
                 margin: 0 !important;
-                padding: 5mm !important;
+                padding: 0 !important;
+                width: 100% !important;
+                height: auto !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .no-print { display: none !important; }
+            .print-area {
+                padding: 0 !important;
+                margin: 0 !important;
+                width: 100% !important;
+            }
+            .page-a4 {
+                width: 210mm !important;
+                height: 297mm !important;
+                padding: 8mm 10mm !important;
+                margin: 0 auto !important;
+                border: none !important;
+                box-shadow: none !important;
+                page-break-after: always !important;
+                break-after: page !important;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: space-between !important;
+                overflow: hidden !important;
             }
             .force-page-break {
                 page-break-before: always !important;
@@ -55,13 +78,13 @@ part1 = """
             }
         }
 
-        /* Estilos en Pantalla */
+        /* Vista en Pantalla / Previa */
         .page-a4 {
             width: 210mm;
             min-height: 297mm;
-            padding: 8mm;
+            padding: 8mm 10mm;
             margin: 0 auto;
-            background: white;
+            background: #ffffff;
             box-sizing: border-box;
         }
 
@@ -69,16 +92,11 @@ part1 = """
             page-break-inside: avoid !important;
             break-inside: avoid !important;
         }
-
-        .force-page-break {
-            page-break-before: always !important;
-            break-before: page !important;
-        }
     </style>
 </head>
 <body class="bg-industrialBg text-slate-800 antialiased min-h-screen flex flex-col justify-between" x-data="reportApp()">
 
-    <!-- Header Principal -->
+    <!-- Header Principal Interactivo (No se imprime) -->
     <header class="no-print bg-petroleum text-white shadow-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-3">
             <div class="flex items-center space-x-3">
@@ -87,7 +105,7 @@ part1 = """
                 </div>
                 <div>
                     <h1 class="font-bold text-base sm:text-lg tracking-wide">MINING REPORT PRO</h1>
-                    <p class="text-[11px] text-slate-400">Sistema de Información de Faena y Anexos</p>
+                    <p class="text-[11px] text-slate-400">Control Operacional de Turno y Evidencia</p>
                 </div>
             </div>
             <div class="flex items-center space-x-2 w-full sm:w-auto justify-end">
@@ -98,23 +116,24 @@ part1 = """
                     <i class="fa-solid fa-eye"></i><span>Ver Previa</span>
                 </button>
                 <button @click="exportPDF()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-xs font-semibold transition shadow flex items-center space-x-1.5">
-                    <i class="fa-solid fa-file-pdf"></i><span>Descargar PDF</span>
+                    <i class="fa-solid fa-file-pdf"></i><span>Guardar PDF Limpio</span>
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- Notificación flotante -->
+    <!-- Notificación Flotante -->
     <div x-show="notification" x-transition class="no-print fixed bottom-5 right-5 z-50 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center space-x-3 border-l-4 border-corporate">
         <i class="fa-solid fa-circle-check text-corporate text-lg"></i>
         <span class="text-xs sm:text-sm font-medium" x-text="notificationText"></span>
     </div>
 
-    <main class="max-w-7xl mx-auto px-2 sm:px-4 py-6 w-full flex-grow">
+    <main class="max-w-7xl mx-auto px-2 sm:px-4 py-6 w-full flex-grow print-area">
         
-        <!-- VISTA 1: FORMULARIO -->
+        <!-- VISTA 1: FORMULARIO DE EDICIÓN (No se imprime) -->
         <div x-show="activeTab === 'editor'" class="no-print space-y-6">
             
+            <!-- 1. Encabezado -->
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-6">
                 <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
                     <h2 class="text-sm sm:text-base font-bold text-petroleum flex items-center space-x-2">
@@ -349,17 +368,16 @@ part1 = """
                 </div>
             </div>
         </div>
-"""
 
-part2 = """
-        <!-- VISTA PREVIA Y PDF -->
+        <!-- VISTA PREVIA Y DOCUMENTO IMPRESO FORMATO A4 -->
         <div class="flex justify-center w-full overflow-x-auto">
-            <div id="full-report-container" class="page-a4 shadow-2xl border border-slate-300 text-slate-900 text-xs my-2">
+            <div id="full-report-container" class="w-full max-w-[210mm] space-y-0">
                 
-                <!-- PÁGINA 1 -->
-                <div class="flex flex-col justify-between min-h-[265mm]">
+                <!-- PÁGINA 1: CONTROL OPERACIONAL -->
+                <div class="page-a4 shadow-xl border border-slate-300 text-slate-900 text-xs">
                     <div>
-                        <div class="border-2 border-slate-800 mb-3 grid grid-cols-12 text-center">
+                        <!-- Encabezado de la Hoja con Bordes Definidos -->
+                        <div class="border-2 border-slate-800 mb-3 grid grid-cols-12 text-center bg-white">
                             <div class="col-span-4 border-r-2 border-slate-800 p-2 flex items-center justify-center bg-slate-50">
                                 <div>
                                     <span class="font-extrabold text-xs tracking-wider text-slate-900 uppercase block" x-text="header.company"></span>
@@ -367,14 +385,15 @@ part2 = """
                                 </div>
                             </div>
                             <div class="col-span-6 border-r-2 border-slate-800 p-2 flex items-center justify-center bg-white">
-                                <span class="font-bold text-xs sm:text-sm tracking-wide uppercase" x-text="header.title"></span>
+                                <span class="font-bold text-xs sm:text-sm tracking-wide uppercase text-slate-900" x-text="header.title"></span>
                             </div>
                             <div class="col-span-2 p-2 flex flex-col justify-center items-center text-[9px] font-bold bg-slate-50">
                                 <span>PÁG. 1 DE 2</span>
                             </div>
                         </div>
 
-                        <div class="border border-slate-800 mb-3 text-[10px]">
+                        <!-- Cuadro Metadata Principal -->
+                        <div class="border border-slate-800 mb-3 text-[10px] w-full">
                             <div class="bg-slate-200 font-bold px-3 py-1 border-b border-slate-800 text-slate-800 uppercase tracking-wide" x-text="header.area"></div>
                             <div class="grid grid-cols-2 border-b border-slate-300">
                                 <div class="p-1.5 px-3 border-r border-slate-300 font-semibold">TURNO: <span class="font-normal uppercase" x-text="header.shift"></span></div>
@@ -388,7 +407,7 @@ part2 = """
                             </div>
                         </div>
 
-                        <!-- Equipos -->
+                        <!-- 1. Tabla de Equipos -->
                         <div class="mb-3 avoid-break">
                             <div class="bg-slate-800 text-white font-bold px-3 py-1 text-[10px] uppercase tracking-wide mb-1">1. Equipos y Maquinaria en Turno</div>
                             <table class="w-full border-collapse border border-slate-400 text-[9px]">
@@ -422,11 +441,12 @@ part2 = """
                             </table>
                         </div>
 
+                        <!-- Nota Crítica -->
                         <div class="bg-amber-50 border border-amber-300 text-amber-900 font-bold px-3 py-1 text-[9px] mb-3 avoid-break">
                             NOTA: <span class="font-normal" x-text="header.note"></span>
                         </div>
 
-                        <!-- Actividades -->
+                        <!-- 2. Tabla de Actividades -->
                         <div class="mb-3 avoid-break">
                             <div class="bg-slate-800 text-white font-bold px-3 py-1 text-[10px] uppercase tracking-wide mb-1">2. Actividades Realizadas</div>
                             <table class="w-full border-collapse border border-slate-400 text-[9px]">
@@ -451,7 +471,7 @@ part2 = """
                             </table>
                         </div>
 
-                        <!-- Instalaciones -->
+                        <!-- 3. Tabla de Instalaciones -->
                         <div class="mb-3 avoid-break">
                             <div class="bg-slate-800 text-white font-bold px-3 py-1 text-[10px] uppercase tracking-wide mb-1">3. Estado de Instalaciones de Faena / Sala de Cambio</div>
                             <table class="w-full border-collapse border border-slate-400 text-[9px]">
@@ -475,16 +495,31 @@ part2 = """
                         </div>
                     </div>
 
-                    <div class="text-[8px] text-slate-500 border-t border-slate-300 pt-1 flex justify-between mt-2">
-                        <span x-text="header.company + ' - Control Operacional de Turno'"></span>
-                        <span>Documento Digital Generado Oficial</span>
+                    <!-- Bloque Inferior de Firmas Oficiales -->
+                    <div class="avoid-break mt-2">
+                        <div class="grid grid-cols-2 gap-6 pt-4 border-t border-slate-300 text-center text-[9px]">
+                            <div class="px-4">
+                                <div class="h-8 border-b border-slate-400 mb-1"></div>
+                                <span class="font-bold uppercase block text-slate-900" x-text="header.supervisor"></span>
+                                <span class="text-slate-500">Supervisor Responsable (Entrega)</span>
+                            </div>
+                            <div class="px-4">
+                                <div class="h-8 border-b border-slate-400 mb-1"></div>
+                                <span class="font-bold uppercase block text-slate-900">V° B° / RECIBE TURNO</span>
+                                <span class="text-slate-500">Supervisor / Administración</span>
+                            </div>
+                        </div>
+                        <div class="text-[8px] text-slate-500 border-t border-slate-200 pt-1 flex justify-between mt-2">
+                            <span x-text="header.company + ' - Control Operacional de Turno'"></span>
+                            <span>Documento Digital Generado Oficial</span>
+                        </div>
                     </div>
                 </div>
 
-                <div class="force-page-break pt-4"></div>
+                <div class="force-page-break no-print" style="height: 20px;"></div>
 
-                <!-- PÁGINA 2 -->
-                <div class="flex flex-col justify-between min-h-[265mm]">
+                <!-- PÁGINA 2: ANEXO FOTOGRÁFICO -->
+                <div class="page-a4 shadow-xl border border-slate-300 text-slate-900 text-xs">
                     <div>
                         <div class="border-2 border-slate-800 mb-4 grid grid-cols-12 bg-slate-50 text-center">
                             <div class="col-span-9 p-2 border-r-2 border-slate-800 text-left">
@@ -597,45 +632,4 @@ part2 = """
                 addActivity() { this.activityList.push({ location: '', description: '', progress: 100 }); this.showNotification('Actividad agregada'); },
                 removeActivity(index) { this.activityList.splice(index, 1); },
 
-                addFacility() { this.facilityList.push({ element: '', status: 'BUENO', obs: '' }); this.showNotification('Elemento agregado'); },
-                removeFacility(index) { this.facilityList.splice(index, 1); },
-
-                addPhotoPair() { this.photoPairs.push({ location: '', description: '', beforeImg: '', beforeNote: '', afterImg: '', afterNote: '' }); this.showNotification('Comparativa agregada'); },
-                removePhotoPair(index) { this.photoPairs.splice(index, 1); },
-
-                handleImageUpload(event, index, field) {
-                    const file = event.target.files[0];
-                    if (file) {
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            this.photoPairs[index][field] = e.target.result;
-                            this.showNotification('Fotografía cargada correctamente');
-                        };
-                        reader.readAsDataURL(file);
-                    }
-                },
-
-                exportPDF() {
-                    // Cambiar primero a la vista previa para renderizar el documento
-                    this.activeTab = 'preview';
-                    this.showNotification('Abriendo visor de impresión / Guardar como PDF...');
-                    
-                    setTimeout(() => {
-                        window.print();
-                    }, 300);
-                }
-            }
-        }
-    </script>
-</body>
-</html>
-"""
-
-with open("index.html", "w", encoding="utf-8") as f:
-    f.write(part1)
-    f.write(part2)
-
-with open("index.html", "r", encoding="utf-8") as f:
-    html_code = f.read()
-
-components.html(html_code, height=1350, scrolling=True)
+                addFacility() { this.facilityList.push({ element: '', status: 'BUENO
