@@ -1,4 +1,3 @@
-
 import streamlit as st
 import streamlit.components.v1 as components
 
@@ -9,7 +8,6 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Estructura limpia y robusta para Streamlit
 part1 = """
 <!DOCTYPE html>
 <html lang="es">
@@ -39,23 +37,32 @@ part1 = """
     <style>
         body { font-family: 'Inter', sans-serif; }
         
-        /* Contenedor A4 Estricto */
+        /* Estilos de Impresión Oficial A4 */
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; margin: 0 !important; padding: 0 !important; }
+            .page-a4 {
+                box-shadow: none !important;
+                border: none !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 5mm !important;
+            }
+            .force-page-break {
+                page-break-before: always !important;
+                break-before: page !important;
+            }
+        }
+
+        /* Estilos en Pantalla */
         .page-a4 {
             width: 210mm;
             min-height: 297mm;
-            padding: 10mm;
+            padding: 8mm;
             margin: 0 auto;
             background: white;
             box-sizing: border-box;
-        }
-
-        .pdf-render-mode {
-            position: absolute !important;
-            left: 0 !important;
-            top: 0 !important;
-            margin: 0 !important;
-            width: 210mm !important;
-            box-sizing: border-box !important;
         }
 
         .avoid-break {
@@ -301,358 +308,4 @@ part1 = """
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
                                 <div>
                                     <label class="block text-[11px] font-semibold text-slate-600 mb-1">Ubicación / Sector</label>
-                                    <input type="text" x-model="pair.location" placeholder="Ej: CT 135 C" class="w-full text-xs border border-slate-300 rounded p-2 bg-white">
-                                </div>
-                                <div class="sm:col-span-2">
-                                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">Descripción de la tarea ejecutada</label>
-                                    <input type="text" x-model="pair.description" placeholder="Ej: Limpieza manual de pasillo" class="w-full text-xs border border-slate-300 rounded p-2 bg-white">
-                                </div>
-                            </div>
-
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-200">
-                                <div class="bg-white p-3 rounded-lg border border-slate-200">
-                                    <label class="block text-xs font-bold text-amber-700 mb-1.5"><i class="fa-solid fa-clock-rotate-left"></i> FOTO ANTES</label>
-                                    <div class="flex items-center space-x-3">
-                                        <div class="w-20 h-20 bg-slate-100 rounded border border-slate-200 flex items-center justify-center overflow-hidden shrink-0">
-                                            <template x-if="pair.beforeImg"><img :src="pair.beforeImg" class="w-full h-full object-cover"></template>
-                                            <template x-if="!pair.beforeImg"><i class="fa-solid fa-image text-slate-300 text-xl"></i></template>
-                                        </div>
-                                        <div class="flex-1 min-w-0">
-                                            <input type="file" accept="image/*" @change="handleImageUpload($event, index, 'beforeImg')" class="w-full text-[10px] text-slate-500">
-                                            <input type="text" x-model="pair.beforeNote" placeholder="Observación estado previo" class="mt-2 w-full text-xs border border-slate-200 rounded p-1.5">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="bg-white p-3 rounded-lg border border-slate-200">
-                                    <label class="block text-xs font-bold text-emerald-700 mb-1.5"><i class="fa-solid fa-circle-check"></i> FOTO DESPUÉS</label>
-                                    <div class="flex items-center space-x-3">
-                                        <div class="w-20 h-20 bg-slate-100 rounded border border-slate-200 flex items-center justify-center overflow-hidden shrink-0">
-                                            <template x-if="pair.afterImg"><img :src="pair.afterImg" class="w-full h-full object-cover"></template>
-                                            <template x-if="!pair.afterImg"><i class="fa-solid fa-image text-slate-300 text-xl"></i></template>
-                                        </div>
-                                        <div class="flex-1 min-w-0">
-                                            <input type="file" accept="image/*" @change="handleImageUpload($event, index, 'afterImg')" class="w-full text-[10px] text-slate-500">
-                                            <input type="text" x-model="pair.afterNote" placeholder="Observación resultado final" class="mt-2 w-full text-xs border border-slate-200 rounded p-1.5">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-                </div>
-            </div>
-        </div>
-"""
-
-part2 = """
-        <!-- VISTA PREVIA Y PDF -->
-        <div class="flex justify-center w-full overflow-x-auto">
-            <div id="full-report-container" class="page-a4 shadow-2xl border border-slate-300 text-slate-900 text-xs my-2">
-                
-                <!-- PÁGINA 1 -->
-                <div class="flex flex-col justify-between min-h-[265mm]">
-                    <div>
-                        <div class="border-2 border-slate-800 mb-3 grid grid-cols-12 text-center">
-                            <div class="col-span-4 border-r-2 border-slate-800 p-2 flex items-center justify-center bg-slate-50">
-                                <div>
-                                    <span class="font-extrabold text-xs tracking-wider text-slate-900 uppercase block" x-text="header.company"></span>
-                                    <span class="text-[8px] text-slate-500 font-bold">SISTEMA INTEGRADO DE GESTIÓN</span>
-                                </div>
-                            </div>
-                            <div class="col-span-6 border-r-2 border-slate-800 p-2 flex items-center justify-center bg-white">
-                                <span class="font-bold text-xs sm:text-sm tracking-wide uppercase" x-text="header.title"></span>
-                            </div>
-                            <div class="col-span-2 p-2 flex flex-col justify-center items-center text-[9px] font-bold bg-slate-50">
-                                <span>PÁG. 1 DE 2</span>
-                            </div>
-                        </div>
-
-                        <div class="border border-slate-800 mb-3 text-[10px]">
-                            <div class="bg-slate-200 font-bold px-3 py-1 border-b border-slate-800 text-slate-800 uppercase tracking-wide" x-text="header.area"></div>
-                            <div class="grid grid-cols-2 border-b border-slate-300">
-                                <div class="p-1.5 px-3 border-r border-slate-300 font-semibold">TURNO: <span class="font-normal uppercase" x-text="header.shift"></span></div>
-                                <div class="p-1.5 px-3 font-semibold">FECHA: <span class="font-normal" x-text="header.date"></span></div>
-                            </div>
-                            <div class="p-1.5 px-3 border-b border-slate-300 font-semibold bg-slate-50">
-                                SUPERVISOR A CARGO: <span class="font-normal uppercase" x-text="header.supervisor"></span>
-                            </div>
-                            <div class="p-1.5 px-3 font-semibold bg-teal-50/70 text-slate-900">
-                                DOTACIÓN / PERSONAL ASIGNADO: <span class="font-normal" x-text="header.workforce || 'No especificada'"></span>
-                            </div>
-                        </div>
-
-                        <!-- Equipos -->
-                        <div class="mb-3 avoid-break">
-                            <div class="bg-slate-800 text-white font-bold px-3 py-1 text-[10px] uppercase tracking-wide mb-1">1. Equipos y Maquinaria en Turno</div>
-                            <table class="w-full border-collapse border border-slate-400 text-[9px]">
-                                <thead>
-                                    <tr class="bg-slate-100 text-slate-800 font-bold">
-                                        <th class="border border-slate-400 p-1 text-left w-1/4">EQUIPOS</th>
-                                        <th class="border border-slate-400 p-1 text-center w-24">COMBUSTIBLE</th>
-                                        <th class="border border-slate-400 p-1 text-center w-24">HORÓMETROS / KM</th>
-                                        <th class="border border-slate-400 p-1 text-center w-20">PRÓX. MANT.</th>
-                                        <th class="border border-slate-400 p-1 text-left">OBSERVACIONES</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <template x-for="eq in equipmentList" :key="eq.name">
-                                        <tr>
-                                            <td class="border border-slate-300 p-1 font-semibold" x-text="eq.name"></td>
-                                            <td class="border border-slate-300 p-1 text-center">
-                                                <div class="flex justify-center space-x-1 text-[8px]">
-                                                    <span :class="eq.fuel === '1/4' ? 'font-bold bg-slate-300 px-0.5 rounded' : 'text-slate-400'">1/4</span>
-                                                    <span :class="eq.fuel === '1/2' ? 'font-bold bg-slate-300 px-0.5 rounded' : 'text-slate-400'">1/2</span>
-                                                    <span :class="eq.fuel === '3/4' ? 'font-bold bg-slate-300 px-0.5 rounded' : 'text-slate-400'">3/4</span>
-                                                    <span :class="eq.fuel === 'Full' ? 'font-bold bg-slate-300 px-0.5 rounded' : 'text-slate-400'">Full</span>
-                                                </div>
-                                            </td>
-                                            <td class="border border-slate-300 p-1 text-center" x-text="eq.horometer"></td>
-                                            <td class="border border-slate-300 p-1 text-center" x-text="eq.nextMaint"></td>
-                                            <td class="border border-slate-300 p-1" x-text="eq.obs"></td>
-                                        </tr>
-                                    </template>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <div class="bg-amber-50 border border-amber-300 text-amber-900 font-bold px-3 py-1 text-[9px] mb-3 avoid-break">
-                            NOTA: <span class="font-normal" x-text="header.note"></span>
-                        </div>
-
-                        <!-- Actividades -->
-                        <div class="mb-3 avoid-break">
-                            <div class="bg-slate-800 text-white font-bold px-3 py-1 text-[10px] uppercase tracking-wide mb-1">2. Actividades Realizadas</div>
-                            <table class="w-full border-collapse border border-slate-400 text-[9px]">
-                                <thead>
-                                    <tr class="bg-slate-100 text-slate-800 font-bold">
-                                        <th class="border border-slate-400 p-1 text-center w-6">#</th>
-                                        <th class="border border-slate-400 p-1 text-left w-32">LUGAR ESPECÍFICO</th>
-                                        <th class="border border-slate-400 p-1 text-left">ACTIVIDAD REALIZADA</th>
-                                        <th class="border border-slate-400 p-1 text-center w-16">% AVANCE</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <template x-for="(act, index) in activityList" :key="index">
-                                        <tr>
-                                            <td class="border border-slate-300 p-1 text-center font-bold" x-text="index + 1"></td>
-                                            <td class="border border-slate-300 p-1 font-semibold" x-text="act.location"></td>
-                                            <td class="border border-slate-300 p-1" x-text="act.description"></td>
-                                            <td class="border border-slate-300 p-1 text-center font-bold" x-text="act.progress + '%'"></td>
-                                        </tr>
-                                    </template>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <!-- Instalaciones -->
-                        <div class="mb-3 avoid-break">
-                            <div class="bg-slate-800 text-white font-bold px-3 py-1 text-[10px] uppercase tracking-wide mb-1">3. Estado de Instalaciones de Faena / Sala de Cambio</div>
-                            <table class="w-full border-collapse border border-slate-400 text-[9px]">
-                                <thead>
-                                    <tr class="bg-slate-100 text-slate-800 font-bold">
-                                        <th class="border border-slate-400 p-1 text-left w-1/3">ELEMENTOS</th>
-                                        <th class="border border-slate-400 p-1 text-center w-24">ESTADO</th>
-                                        <th class="border border-slate-400 p-1 text-left">OBSERVACIONES</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <template x-for="fac in facilityList" :key="fac.element">
-                                        <tr>
-                                            <td class="border border-slate-300 p-1 font-semibold" x-text="fac.element"></td>
-                                            <td class="border border-slate-300 p-1 text-center font-bold" :class="fac.status === 'BUENO' ? 'text-emerald-700' : 'text-red-700'" x-text="fac.status"></td>
-                                            <td class="border border-slate-300 p-1" x-text="fac.obs"></td>
-                                        </tr>
-                                    </template>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="text-[8px] text-slate-500 border-t border-slate-300 pt-1 flex justify-between mt-2">
-                        <span x-text="header.company + ' - Control Operacional de Turno'"></span>
-                        <span>Documento Digital Generado Oficial</span>
-                    </div>
-                </div>
-
-                <div class="force-page-break pt-4"></div>
-
-                <!-- PÁGINA 2 -->
-                <div class="flex flex-col justify-between min-h-[265mm]">
-                    <div>
-                        <div class="border-2 border-slate-800 mb-4 grid grid-cols-12 bg-slate-50 text-center">
-                            <div class="col-span-9 p-2 border-r-2 border-slate-800 text-left">
-                                <span class="font-extrabold text-xs tracking-wider text-slate-900 uppercase block" x-text="header.company"></span>
-                                <span class="font-bold text-[10px] text-corporate uppercase">ANEXO FOTOGRÁFICO - REGISTRO DE TRABAJOS (ANTES / DESPUÉS)</span>
-                            </div>
-                            <div class="col-span-3 p-2 flex flex-col justify-center items-center text-[9px] font-bold">
-                                <span>PÁG. 2 DE 2</span>
-                                <span class="text-[8px] text-slate-500 font-normal" x-text="header.date"></span>
-                            </div>
-                        </div>
-
-                        <div class="space-y-4">
-                            <template x-for="(pair, index) in photoPairs" :key="index">
-                                <div class="border border-slate-400 rounded-lg p-2.5 bg-slate-50/50 avoid-break">
-                                    <div class="flex justify-between items-center border-b border-slate-300 pb-1 mb-2">
-                                        <span class="font-bold text-slate-800 text-[10px]">COMPARATIVA N° <span x-text="index + 1"></span> - <span x-text="pair.location"></span></span>
-                                        <span class="text-slate-600 text-[9px]" x-text="pair.description"></span>
-                                    </div>
-                                    <div class="grid grid-cols-2 gap-3">
-                                        <div class="bg-white p-2 rounded border border-slate-300 text-center">
-                                            <div class="font-bold text-amber-700 text-[9px] mb-1"><i class="fa-solid fa-clock-rotate-left"></i> ANTES DE LA TAREA</div>
-                                            <div class="h-36 bg-slate-100 rounded border border-slate-200 flex items-center justify-center overflow-hidden mb-1">
-                                                <template x-if="pair.beforeImg"><img :src="pair.beforeImg" class="w-full h-full object-cover"></template>
-                                                <template x-if="!pair.beforeImg"><span class="text-slate-400 italic text-[9px]">Sin foto</span></template>
-                                            </div>
-                                            <p class="text-[9px] text-slate-600 italic truncate" x-text="pair.beforeNote || 'Estado previo'"></p>
-                                        </div>
-                                        <div class="bg-white p-2 rounded border border-slate-300 text-center">
-                                            <div class="font-bold text-emerald-700 text-[9px] mb-1"><i class="fa-solid fa-circle-check"></i> DESPUÉS DE LA TAREA</div>
-                                            <div class="h-36 bg-slate-100 rounded border border-slate-200 flex items-center justify-center overflow-hidden mb-1">
-                                                <template x-if="pair.afterImg"><img :src="pair.afterImg" class="w-full h-full object-cover"></template>
-                                                <template x-if="!pair.afterImg"><span class="text-slate-400 italic text-[9px]">Sin foto</span></template>
-                                            </div>
-                                            <p class="text-[9px] text-slate-600 italic truncate" x-text="pair.afterNote || 'Resultado final'"></p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
-                    </div>
-
-                    <div class="text-[8px] text-slate-500 border-t border-slate-300 pt-1 flex justify-between mt-4">
-                        <span x-text="header.company + ' - Registro Fotográfico de Evidencia'"></span>
-                        <span>Fin del Informe Técnico</span>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-    </main>
-
-    <script>
-        function reportApp() {
-            return {
-                activeTab: 'editor',
-                notification: false,
-                notificationText: '',
-                
-                header: {
-                    company: 'CODELCO - DIVISIÓN TENIENTE',
-                    title: 'INFORME ENTREGA DE TURNO DIARIO',
-                    area: 'ÁREA CHANCADO SECUNDARIO - TERCIARIO',
-                    shift: 'TURNO: B, NOCHE',
-                    date: new Date().toISOString().split('T')[0],
-                    supervisor: 'HERNAN GONZALO TRONCOSO OÑATE',
-                    workforce: '14 Personas (4 Operadores Aspirador, 2 Cargador, 7 Aseo, 1 APR)',
-                    note: 'REVISAR AIRE ACONDICIONADO DE SALA CAMBIO, OFICINA Y SALA REUNIONES'
-                },
-
-                equipmentList: [
-                    { name: 'Camión aspirador 12', fuel: '3/4', horometer: '5853 / 5861', nextMaint: '4270', obs: 'Equipo operativo, recarga combustible.' },
-                    { name: 'Camión aspirador 34', fuel: 'Full', horometer: '12693 / 12670', nextMaint: '12740', obs: 'Equipo Operativo, combustible 140 LTS.' },
-                    { name: 'Mini cargador 450', fuel: '1/2', horometer: '2212.6 / 2214.6', nextMaint: '2500.0', obs: 'Equipo operativo.' },
-                    { name: 'Camioneta VPBW 16', fuel: 'Full', horometer: '9633.1 / 9', nextMaint: '10.000', obs: 'Equipo operativo.' }
-                ],
-
-                activityList: [
-                    { location: 'CT 135 C', description: 'LIMPIEZA MANUAL SECTOR PASILLO IZQUIERDO', progress: 100 },
-                    { location: 'CH 2°, 3°', description: 'HUMECTACION DE CAMINOS 2 VECES (APOYO PRIMARIO)', progress: 100 },
-                    { location: 'SILICA', description: 'LIMPIEZA MANUAL SECTOR PARRILLA Y ACCESO', progress: 100 }
-                ],
-
-                facilityList: [
-                    { element: 'CASILLEROS', status: 'BUENO', obs: 'OPERATIVO' },
-                    { element: 'DUCHAS', status: 'BUENO', obs: 'OPERATIVO' },
-                    { element: 'BAÑOS (WC)', status: 'BUENO', obs: 'Mantener puerta cerrada' },
-                    { element: 'URINARIOS', status: 'BUENO', obs: 'OK' }
-                ],
-
-                photoPairs: [
-                    {
-                        location: 'CT 135 C',
-                        description: 'Limpieza de pasillo principal y retiro de material acumulado.',
-                        beforeImg: '', beforeNote: 'Acumulación de mineral en sector pasillo.',
-                        afterImg: '', afterNote: 'Sector despejado y limpio conforme a norma.'
-                    }
-                ],
-
-                showNotification(msg) {
-                    this.notificationText = msg;
-                    this.notification = true;
-                    setTimeout(() => { this.notification = false; }, 3000);
-                },
-
-                addEquipment() { this.equipmentList.push({ name: '', fuel: 'Full', horometer: '', nextMaint: '', obs: '' }); this.showNotification('Equipo agregado'); },
-                removeEquipment(index) { this.equipmentList.splice(index, 1); },
-
-                addActivity() { this.activityList.push({ location: '', description: '', progress: 100 }); this.showNotification('Actividad agregada'); },
-                removeActivity(index) { this.activityList.splice(index, 1); },
-
-                addFacility() { this.facilityList.push({ element: '', status: 'BUENO', obs: '' }); this.showNotification('Elemento agregado'); },
-                removeFacility(index) { this.facilityList.splice(index, 1); },
-
-                addPhotoPair() { this.photoPairs.push({ location: '', description: '', beforeImg: '', beforeNote: '', afterImg: '', afterNote: '' }); this.showNotification('Comparativa agregada'); },
-                removePhotoPair(index) { this.photoPairs.splice(index, 1); },
-
-                handleImageUpload(event, index, field) {
-                    const file = event.target.files[0];
-                    if (file) {
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            this.photoPairs[index][field] = e.target.result;
-                            this.showNotification('Fotografía cargada correctamente');
-                        };
-                        reader.readAsDataURL(file);
-                    }
-                },
-
-                exportPDF() {
-                    this.showNotification('Generando PDF sin recortes...');
-                    const element = document.getElementById('full-report-container');
-                    
-                    // Forzar posición cero y renderizado A4 limpio
-                    element.classList.add('pdf-render-mode');
-
-                    const opt = {
-                        margin:       0,
-                        filename:     `Informe_Turno_${this.header.date}.pdf`,
-                        image:        { type: 'jpeg', quality: 0.98 },
-                        html2canvas:  { 
-                            scale: 2, 
-                            useCORS: true, 
-                            logging: false, 
-                            scrollX: 0, 
-                            scrollY: 0,
-                            windowWidth: 794 // 210mm a 96 DPI exacta
-                        },
-                        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                        pagebreak:    { mode: ['css', 'legacy'] }
-                    };
-
-                    html2pdf().set(opt).from(element).save().then(() => {
-                        element.classList.remove('pdf-render-mode');
-                        this.showNotification('¡PDF generado correctamente!');
-                    }).catch(err => {
-                        element.classList.remove('pdf-render-mode');
-                        console.error('Error al generar PDF:', err);
-                        this.showNotification('Error al exportar.');
-                    });
-                }
-            }
-        }
-    </script>
-</body>
-</html>
-"""
-
-# Generación dinámica sin archivos sueltos
-with open("index.html", "w", encoding="utf-8") as f:
-    f.write(part1)
-    f.write(part2)
-
-with open("index.html", "r", encoding="utf-8") as f:
-    html_code = f.read()
-
-components.html(html_code, height=1350, scrolling=True)
+                                    <input type="text" x-model="
