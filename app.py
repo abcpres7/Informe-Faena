@@ -1,3 +1,4 @@
+
 import streamlit as st
 import streamlit.components.v1 as components
 
@@ -8,7 +9,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-part1 = """
+html_code = """
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -17,7 +18,6 @@ part1 = """
     <title>Generador de Informes Técnicos - Industrial Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
@@ -37,17 +37,18 @@ part1 = """
     <style>
         body { font-family: 'Inter', sans-serif; }
         
-        /* Estilos de Impresión Oficial A4 */
+        /* Estilos de Impresión Nativa (PDF Perfecto en Celular y PC) */
         @media print {
-            .no-print { display: none !important; }
             body { background: white !important; margin: 0 !important; padding: 0 !important; }
+            .no-print { display: none !important; }
             .page-a4 {
                 box-shadow: none !important;
                 border: none !important;
                 width: 100% !important;
                 max-width: 100% !important;
                 margin: 0 !important;
-                padding: 5mm !important;
+                padding: 10mm !important;
+                page-break-after: always;
             }
             .force-page-break {
                 page-break-before: always !important;
@@ -55,11 +56,10 @@ part1 = """
             }
         }
 
-        /* Estilos en Pantalla */
         .page-a4 {
             width: 210mm;
             min-height: 297mm;
-            padding: 8mm;
+            padding: 10mm;
             margin: 0 auto;
             background: white;
             box-sizing: border-box;
@@ -78,7 +78,7 @@ part1 = """
 </head>
 <body class="bg-industrialBg text-slate-800 antialiased min-h-screen flex flex-col justify-between" x-data="reportApp()">
 
-    <!-- Header Principal -->
+    <!-- Header Principal (No se imprime) -->
     <header class="no-print bg-petroleum text-white shadow-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-3">
             <div class="flex items-center space-x-3">
@@ -98,7 +98,7 @@ part1 = """
                     <i class="fa-solid fa-eye"></i><span>Ver Previa</span>
                 </button>
                 <button @click="exportPDF()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-xs font-semibold transition shadow flex items-center space-x-1.5">
-                    <i class="fa-solid fa-file-pdf"></i><span>Descargar PDF</span>
+                    <i class="fa-solid fa-file-pdf"></i><span>Guardar / Imprimir PDF</span>
                 </button>
             </div>
         </div>
@@ -112,7 +112,7 @@ part1 = """
 
     <main class="max-w-7xl mx-auto px-2 sm:px-4 py-6 w-full flex-grow">
         
-        <!-- VISTA 1: FORMULARIO -->
+        <!-- VISTA 1: FORMULARIO (No se imprime) -->
         <div x-show="activeTab === 'editor'" class="no-print space-y-6">
             
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-6">
@@ -194,118 +194,4 @@ part1 = """
                                         </select>
                                     </td>
                                     <td class="p-1.5"><input type="text" x-model="eq.horometer" class="w-full border border-slate-200 rounded p-1.5 text-xs"></td>
-                                    <td class="p-1.5"><input type="text" x-model="eq.nextMaint" class="w-full border border-slate-200 rounded p-1.5 text-xs"></td>
-                                    <td class="p-1.5"><input type="text" x-model="eq.obs" class="w-full border border-slate-200 rounded p-1.5 text-xs"></td>
-                                    <td class="p-1.5 text-center"><button @click="removeEquipment(index)" class="text-red-500 hover:text-red-700 p-1"><i class="fa-solid fa-trash-can text-xs"></i></button></td>
-                                </tr>
-                            </template>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- 3. Actividades -->
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-6">
-                <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
-                    <h2 class="text-sm sm:text-base font-bold text-petroleum flex items-center space-x-2">
-                        <i class="fa-solid fa-list-check text-corporate"></i>
-                        <span>3. Actividades Realizadas</span>
-                    </h2>
-                    <button @click="addActivity()" class="bg-corporate hover:bg-corporateDark text-white text-xs px-3 py-1.5 rounded-lg transition font-medium">
-                        <i class="fa-solid fa-plus"></i> Añadir Actividad
-                    </button>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs min-w-[550px]">
-                        <thead>
-                            <tr class="bg-slate-100 text-slate-700 text-[11px] uppercase font-semibold">
-                                <th class="p-2.5 w-8 text-center">#</th>
-                                <th class="p-2.5 w-40">Lugar Específico</th>
-                                <th class="p-2.5">Actividad Realizada</th>
-                                <th class="p-2.5 w-24 text-center">% Avance</th>
-                                <th class="p-2.5 text-center w-12">Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100">
-                            <template x-for="(act, index) in activityList" :key="index">
-                                <tr>
-                                    <td class="p-1.5 text-center font-semibold text-xs text-slate-500" x-text="index + 1"></td>
-                                    <td class="p-1.5"><input type="text" x-model="act.location" class="w-full border border-slate-200 rounded p-1.5 text-xs"></td>
-                                    <td class="p-1.5"><input type="text" x-model="act.description" class="w-full border border-slate-200 rounded p-1.5 text-xs"></td>
-                                    <td class="p-1.5 text-center"><input type="number" min="0" max="100" x-model="act.progress" class="w-16 border border-slate-200 rounded p-1.5 text-xs text-center"></td>
-                                    <td class="p-1.5 text-center"><button @click="removeActivity(index)" class="text-red-500 hover:text-red-700 p-1"><i class="fa-solid fa-trash-can text-xs"></i></button></td>
-                                </tr>
-                            </template>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- 4. Instalaciones -->
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-6">
-                <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
-                    <h2 class="text-sm sm:text-base font-bold text-petroleum flex items-center space-x-2">
-                        <i class="fa-solid fa-house-chimney text-corporate"></i>
-                        <span>4. Estado de Instalaciones de Faena / Sala de Cambio</span>
-                    </h2>
-                    <button @click="addFacility()" class="bg-corporate hover:bg-corporateDark text-white text-xs px-3 py-1.5 rounded-lg transition font-medium">
-                        <i class="fa-solid fa-plus"></i> Añadir Elemento
-                    </button>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs min-w-[500px]">
-                        <thead>
-                            <tr class="bg-slate-100 text-slate-700 text-[11px] uppercase font-semibold">
-                                <th class="p-2.5 w-48">Elemento / Área</th>
-                                <th class="p-2.5 w-36">Estado</th>
-                                <th class="p-2.5">Observaciones</th>
-                                <th class="p-2.5 text-center w-12">Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100">
-                            <template x-for="(fac, index) in facilityList" :key="index">
-                                <tr>
-                                    <td class="p-1.5"><input type="text" x-model="fac.element" class="w-full border border-slate-200 rounded p-1.5 text-xs"></td>
-                                    <td class="p-1.5">
-                                        <select x-model="fac.status" class="w-full border border-slate-200 rounded p-1.5 text-xs bg-white font-medium">
-                                            <option value="BUENO">BUENO / OPERATIVO</option>
-                                            <option value="REGULAR">REGULAR</option>
-                                            <option value="MALO">MALO / DEFECTUOSO</option>
-                                        </select>
-                                    </td>
-                                    <td class="p-1.5"><input type="text" x-model="fac.obs" class="w-full border border-slate-200 rounded p-1.5 text-xs"></td>
-                                    <td class="p-1.5 text-center"><button @click="removeFacility(index)" class="text-red-500 hover:text-red-700 p-1"><i class="fa-solid fa-trash-can text-xs"></i></button></td>
-                                </tr>
-                            </template>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- 5. Anexo Fotográfico -->
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-6">
-                <div class="flex flex-wrap items-center justify-between gap-2 pb-3 mb-4 border-b border-slate-100">
-                    <div>
-                        <h2 class="text-sm sm:text-base font-bold text-petroleum flex items-center space-x-2">
-                            <i class="fa-solid fa-camera-retro text-corporate"></i>
-                            <span>5. Anexo Fotográfico (Antes y Después)</span>
-                        </h2>
-                        <p class="text-[11px] text-slate-500 mt-0.5">Se colocará automáticamente en la última hoja del informe sin cortar las fotos.</p>
-                    </div>
-                    <button @click="addPhotoPair()" class="bg-corporate hover:bg-corporateDark text-white text-xs px-3 py-1.5 rounded-lg transition font-medium">
-                        <i class="fa-solid fa-plus"></i> Nueva Comparativa
-                    </button>
-                </div>
-                
-                <div class="space-y-6">
-                    <template x-for="(pair, index) in photoPairs" :key="index">
-                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 sm:p-4 relative">
-                            <div class="flex justify-between items-center mb-3">
-                                <span class="text-xs font-bold text-petroleum uppercase bg-slate-200 px-2 py-0.5 rounded">Comparativa N° <span x-text="index + 1"></span></span>
-                                <button @click="removePhotoPair(index)" class="text-red-500 hover:text-red-700 text-xs font-medium"><i class="fa-solid fa-trash-can"></i> Eliminar</button>
-                            </div>
-                            
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
-                                <div>
-                                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">Ubicación / Sector</label>
-                                    <input type="text" x-model="
+                                    <td class="p-1.5"><input type="text" x-model="eq.nextMaint" class="w-full border border-slate-
