@@ -35,33 +35,41 @@ html_code = """
     </script>
     <style>
         * { box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; }
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
         
-        /* Configuración de Impresión PDF Impecable */
+        /* REGLAS ABSOLUTAS DE IMPRESIÓN PDF */
         @media print {
             @page {
                 size: A4 portrait;
-                margin: 0mm !important; /* Elimina marcas de agua, URLs y fechas del navegador */
+                margin: 0mm !important;
             }
-            html, body {
-                background: #ffffff !important;
+            body, html {
+                background-color: #ffffff !important;
                 margin: 0 !important;
                 padding: 0 !important;
                 width: 100% !important;
-                height: auto !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
-            .no-print { display: none !important; }
-            .print-area {
-                padding: 0 !important;
-                margin: 0 !important;
+            /* Ocultar elementos de la interfaz de la aplicación */
+            header, .no-print, nav, footer {
+                display: none !important;
+            }
+            /* Aislar exclusivamente el contenedor del informe */
+            #print-section {
+                display: block !important;
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
                 width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
             }
             .page-a4 {
                 width: 210mm !important;
                 height: 297mm !important;
-                padding: 8mm 10mm !important;
+                max-height: 297mm !important;
+                padding: 10mm 12mm !important;
                 margin: 0 auto !important;
                 border: none !important;
                 box-shadow: none !important;
@@ -70,7 +78,7 @@ html_code = """
                 display: flex !important;
                 flex-direction: column !important;
                 justify-content: space-between !important;
-                overflow: hidden !important;
+                background: #ffffff !important;
             }
             .force-page-break {
                 page-break-before: always !important;
@@ -78,14 +86,18 @@ html_code = """
             }
         }
 
-        /* Vista en Pantalla / Previa */
+        /* Estilos en Pantalla (Vista Previa) */
         .page-a4 {
             width: 210mm;
             min-height: 297mm;
-            padding: 8mm 10mm;
-            margin: 0 auto;
+            padding: 12mm;
+            margin: 0 auto 20px auto;
             background: #ffffff;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
             box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
         .avoid-break {
@@ -94,7 +106,7 @@ html_code = """
         }
     </style>
 </head>
-<body class="bg-industrialBg text-slate-800 antialiased min-h-screen flex flex-col justify-between" x-data="reportApp()">
+<body class="text-slate-800 antialiased min-h-screen flex flex-col justify-between" x-data="reportApp()">
 
     <!-- Header Principal Interactivo (No se imprime) -->
     <header class="no-print bg-petroleum text-white shadow-md sticky top-0 z-50">
@@ -113,10 +125,10 @@ html_code = """
                     <i class="fa-solid fa-pen-to-square"></i><span>Formulario</span>
                 </button>
                 <button @click="activeTab = 'preview'" :class="activeTab === 'preview' ? 'bg-corporate text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'" class="px-3 py-2 rounded-lg text-xs font-medium transition shadow flex items-center space-x-1.5">
-                    <i class="fa-solid fa-eye"></i><span>Ver Previa</span>
+                    <i class="fa-solid fa-eye"></i><span>Ver Previa A4</span>
                 </button>
                 <button @click="exportPDF()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-xs font-semibold transition shadow flex items-center space-x-1.5">
-                    <i class="fa-solid fa-file-pdf"></i><span>Guardar PDF Limpio</span>
+                    <i class="fa-solid fa-file-pdf"></i><span>Descargar / Imprimir PDF</span>
                 </button>
             </div>
         </div>
@@ -128,7 +140,7 @@ html_code = """
         <span class="text-xs sm:text-sm font-medium" x-text="notificationText"></span>
     </div>
 
-    <main class="max-w-7xl mx-auto px-2 sm:px-4 py-6 w-full flex-grow print-area">
+    <main class="max-w-7xl mx-auto px-2 sm:px-4 py-6 w-full flex-grow">
         
         <!-- VISTA 1: FORMULARIO DE EDICIÓN (No se imprime) -->
         <div x-show="activeTab === 'editor'" class="no-print space-y-6">
@@ -369,206 +381,202 @@ html_code = """
             </div>
         </div>
 
-        <!-- VISTA PREVIA Y DOCUMENTO IMPRESO FORMATO A4 -->
-        <div class="flex justify-center w-full overflow-x-auto">
-            <div id="full-report-container" class="w-full max-w-[210mm] space-y-0">
-                
-                <!-- PÁGINA 1: CONTROL OPERACIONAL -->
-                <div class="page-a4 shadow-xl border border-slate-300 text-slate-900 text-xs">
-                    <div>
-                        <!-- Encabezado de la Hoja con Bordes Definidos -->
-                        <div class="border-2 border-slate-800 mb-3 grid grid-cols-12 text-center bg-white">
-                            <div class="col-span-4 border-r-2 border-slate-800 p-2 flex items-center justify-center bg-slate-50">
-                                <div>
-                                    <span class="font-extrabold text-xs tracking-wider text-slate-900 uppercase block" x-text="header.company"></span>
-                                    <span class="text-[8px] text-slate-500 font-bold">SISTEMA INTEGRADO DE GESTIÓN</span>
-                                </div>
-                            </div>
-                            <div class="col-span-6 border-r-2 border-slate-800 p-2 flex items-center justify-center bg-white">
-                                <span class="font-bold text-xs sm:text-sm tracking-wide uppercase text-slate-900" x-text="header.title"></span>
-                            </div>
-                            <div class="col-span-2 p-2 flex flex-col justify-center items-center text-[9px] font-bold bg-slate-50">
-                                <span>PÁG. 1 DE 2</span>
-                            </div>
-                        </div>
-
-                        <!-- Cuadro Metadata Principal -->
-                        <div class="border border-slate-800 mb-3 text-[10px] w-full">
-                            <div class="bg-slate-200 font-bold px-3 py-1 border-b border-slate-800 text-slate-800 uppercase tracking-wide" x-text="header.area"></div>
-                            <div class="grid grid-cols-2 border-b border-slate-300">
-                                <div class="p-1.5 px-3 border-r border-slate-300 font-semibold">TURNO: <span class="font-normal uppercase" x-text="header.shift"></span></div>
-                                <div class="p-1.5 px-3 font-semibold">FECHA: <span class="font-normal" x-text="header.date"></span></div>
-                            </div>
-                            <div class="p-1.5 px-3 border-b border-slate-300 font-semibold bg-slate-50">
-                                SUPERVISOR A CARGO: <span class="font-normal uppercase" x-text="header.supervisor"></span>
-                            </div>
-                            <div class="p-1.5 px-3 font-semibold bg-teal-50/70 text-slate-900">
-                                DOTACIÓN / PERSONAL ASIGNADO: <span class="font-normal" x-text="header.workforce || 'No especificada'"></span>
-                            </div>
-                        </div>
-
-                        <!-- 1. Tabla de Equipos -->
-                        <div class="mb-3 avoid-break">
-                            <div class="bg-slate-800 text-white font-bold px-3 py-1 text-[10px] uppercase tracking-wide mb-1">1. Equipos y Maquinaria en Turno</div>
-                            <table class="w-full border-collapse border border-slate-400 text-[9px]">
-                                <thead>
-                                    <tr class="bg-slate-100 text-slate-800 font-bold">
-                                        <th class="border border-slate-400 p-1 text-left w-1/4">EQUIPOS</th>
-                                        <th class="border border-slate-400 p-1 text-center w-24">COMBUSTIBLE</th>
-                                        <th class="border border-slate-400 p-1 text-center w-24">HORÓMETROS / KM</th>
-                                        <th class="border border-slate-400 p-1 text-center w-20">PRÓX. MANT.</th>
-                                        <th class="border border-slate-400 p-1 text-left">OBSERVACIONES</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <template x-for="eq in equipmentList" :key="eq.name">
-                                        <tr>
-                                            <td class="border border-slate-300 p-1 font-semibold" x-text="eq.name"></td>
-                                            <td class="border border-slate-300 p-1 text-center">
-                                                <div class="flex justify-center space-x-1 text-[8px]">
-                                                    <span :class="eq.fuel === '1/4' ? 'font-bold bg-slate-300 px-0.5 rounded' : 'text-slate-400'">1/4</span>
-                                                    <span :class="eq.fuel === '1/2' ? 'font-bold bg-slate-300 px-0.5 rounded' : 'text-slate-400'">1/2</span>
-                                                    <span :class="eq.fuel === '3/4' ? 'font-bold bg-slate-300 px-0.5 rounded' : 'text-slate-400'">3/4</span>
-                                                    <span :class="eq.fuel === 'Full' ? 'font-bold bg-slate-300 px-0.5 rounded' : 'text-slate-400'">Full</span>
-                                                </div>
-                                            </td>
-                                            <td class="border border-slate-300 p-1 text-center" x-text="eq.horometer"></td>
-                                            <td class="border border-slate-300 p-1 text-center" x-text="eq.nextMaint"></td>
-                                            <td class="border border-slate-300 p-1" x-text="eq.obs"></td>
-                                        </tr>
-                                    </template>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <!-- Nota Crítica -->
-                        <div class="bg-amber-50 border border-amber-300 text-amber-900 font-bold px-3 py-1 text-[9px] mb-3 avoid-break">
-                            NOTA: <span class="font-normal" x-text="header.note"></span>
-                        </div>
-
-                        <!-- 2. Tabla de Actividades -->
-                        <div class="mb-3 avoid-break">
-                            <div class="bg-slate-800 text-white font-bold px-3 py-1 text-[10px] uppercase tracking-wide mb-1">2. Actividades Realizadas</div>
-                            <table class="w-full border-collapse border border-slate-400 text-[9px]">
-                                <thead>
-                                    <tr class="bg-slate-100 text-slate-800 font-bold">
-                                        <th class="border border-slate-400 p-1 text-center w-6">#</th>
-                                        <th class="border border-slate-400 p-1 text-left w-32">LUGAR ESPECÍFICO</th>
-                                        <th class="border border-slate-400 p-1 text-left">ACTIVIDAD REALIZADA</th>
-                                        <th class="border border-slate-400 p-1 text-center w-16">% AVANCE</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <template x-for="(act, index) in activityList" :key="index">
-                                        <tr>
-                                            <td class="border border-slate-300 p-1 text-center font-bold" x-text="index + 1"></td>
-                                            <td class="border border-slate-300 p-1 font-semibold" x-text="act.location"></td>
-                                            <td class="border border-slate-300 p-1" x-text="act.description"></td>
-                                            <td class="border border-slate-300 p-1 text-center font-bold" x-text="act.progress + '%'"></td>
-                                        </tr>
-                                    </template>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <!-- 3. Tabla de Instalaciones -->
-                        <div class="mb-3 avoid-break">
-                            <div class="bg-slate-800 text-white font-bold px-3 py-1 text-[10px] uppercase tracking-wide mb-1">3. Estado de Instalaciones de Faena / Sala de Cambio</div>
-                            <table class="w-full border-collapse border border-slate-400 text-[9px]">
-                                <thead>
-                                    <tr class="bg-slate-100 text-slate-800 font-bold">
-                                        <th class="border border-slate-400 p-1 text-left w-1/3">ELEMENTOS</th>
-                                        <th class="border border-slate-400 p-1 text-center w-24">ESTADO</th>
-                                        <th class="border border-slate-400 p-1 text-left">OBSERVACIONES</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <template x-for="fac in facilityList" :key="fac.element">
-                                        <tr>
-                                            <td class="border border-slate-300 p-1 font-semibold" x-text="fac.element"></td>
-                                            <td class="border border-slate-300 p-1 text-center font-bold" :class="fac.status === 'BUENO' ? 'text-emerald-700' : 'text-red-700'" x-text="fac.status"></td>
-                                            <td class="border border-slate-300 p-1" x-text="fac.obs"></td>
-                                        </tr>
-                                    </template>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- Bloque Inferior de Firmas Oficiales -->
-                    <div class="avoid-break mt-2">
-                        <div class="grid grid-cols-2 gap-6 pt-4 border-t border-slate-300 text-center text-[9px]">
-                            <div class="px-4">
-                                <div class="h-8 border-b border-slate-400 mb-1"></div>
-                                <span class="font-bold uppercase block text-slate-900" x-text="header.supervisor"></span>
-                                <span class="text-slate-500">Supervisor Responsable (Entrega)</span>
-                            </div>
-                            <div class="px-4">
-                                <div class="h-8 border-b border-slate-400 mb-1"></div>
-                                <span class="font-bold uppercase block text-slate-900">V° B° / RECIBE TURNO</span>
-                                <span class="text-slate-500">Supervisor / Administración</span>
-                            </div>
-                        </div>
-                        <div class="text-[8px] text-slate-500 border-t border-slate-200 pt-1 flex justify-between mt-2">
-                            <span x-text="header.company + ' - Control Operacional de Turno'"></span>
-                            <span>Documento Digital Generado Oficial</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="force-page-break no-print" style="height: 20px;"></div>
-
-                <!-- PÁGINA 2: ANEXO FOTOGRÁFICO -->
-                <div class="page-a4 shadow-xl border border-slate-300 text-slate-900 text-xs">
-                    <div>
-                        <div class="border-2 border-slate-800 mb-4 grid grid-cols-12 bg-slate-50 text-center">
-                            <div class="col-span-9 p-2 border-r-2 border-slate-800 text-left">
+        <!-- SECCIÓN AISLADA EXCLUSIVAMENTE PARA IMPRESIÓN Y VISTA A4 -->
+        <div id="print-section" class="flex flex-col items-center w-full">
+            
+            <!-- PÁGINA 1: CONTROL OPERACIONAL -->
+            <div class="page-a4 text-slate-900 text-xs">
+                <div>
+                    <!-- Encabezado de la Hoja -->
+                    <div class="border-2 border-slate-900 mb-3 grid grid-cols-12 text-center bg-white">
+                        <div class="col-span-4 border-r-2 border-slate-900 p-2 flex items-center justify-center bg-slate-50">
+                            <div>
                                 <span class="font-extrabold text-xs tracking-wider text-slate-900 uppercase block" x-text="header.company"></span>
-                                <span class="font-bold text-[10px] text-corporate uppercase">ANEXO FOTOGRÁFICO - REGISTRO DE TRABAJOS (ANTES / DESPUÉS)</span>
-                            </div>
-                            <div class="col-span-3 p-2 flex flex-col justify-center items-center text-[9px] font-bold">
-                                <span>PÁG. 2 DE 2</span>
-                                <span class="text-[8px] text-slate-500 font-normal" x-text="header.date"></span>
+                                <span class="text-[8px] text-slate-500 font-bold">SISTEMA INTEGRADO DE GESTIÓN</span>
                             </div>
                         </div>
-
-                        <div class="space-y-4">
-                            <template x-for="(pair, index) in photoPairs" :key="index">
-                                <div class="border border-slate-400 rounded-lg p-2.5 bg-slate-50/50 avoid-break">
-                                    <div class="flex justify-between items-center border-b border-slate-300 pb-1 mb-2">
-                                        <span class="font-bold text-slate-800 text-[10px]">COMPARATIVA N° <span x-text="index + 1"></span> - <span x-text="pair.location"></span></span>
-                                        <span class="text-slate-600 text-[9px]" x-text="pair.description"></span>
-                                    </div>
-                                    <div class="grid grid-cols-2 gap-3">
-                                        <div class="bg-white p-2 rounded border border-slate-300 text-center">
-                                            <div class="font-bold text-amber-700 text-[9px] mb-1"><i class="fa-solid fa-clock-rotate-left"></i> ANTES DE LA TAREA</div>
-                                            <div class="h-36 bg-slate-100 rounded border border-slate-200 flex items-center justify-center overflow-hidden mb-1">
-                                                <template x-if="pair.beforeImg"><img :src="pair.beforeImg" class="w-full h-full object-cover"></template>
-                                                <template x-if="!pair.beforeImg"><span class="text-slate-400 italic text-[9px]">Sin foto</span></template>
-                                            </div>
-                                            <p class="text-[9px] text-slate-600 italic truncate" x-text="pair.beforeNote || 'Estado previo'"></p>
-                                        </div>
-                                        <div class="bg-white p-2 rounded border border-slate-300 text-center">
-                                            <div class="font-bold text-emerald-700 text-[9px] mb-1"><i class="fa-solid fa-circle-check"></i> DESPUÉS DE LA TAREA</div>
-                                            <div class="h-36 bg-slate-100 rounded border border-slate-200 flex items-center justify-center overflow-hidden mb-1">
-                                                <template x-if="pair.afterImg"><img :src="pair.afterImg" class="w-full h-full object-cover"></template>
-                                                <template x-if="!pair.afterImg"><span class="text-slate-400 italic text-[9px]">Sin foto</span></template>
-                                            </div>
-                                            <p class="text-[9px] text-slate-600 italic truncate" x-text="pair.afterNote || 'Resultado final'"></p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </template>
+                        <div class="col-span-6 border-r-2 border-slate-900 p-2 flex items-center justify-center bg-white">
+                            <span class="font-bold text-xs sm:text-sm tracking-wide uppercase text-slate-900" x-text="header.title"></span>
+                        </div>
+                        <div class="col-span-2 p-2 flex flex-col justify-center items-center text-[9px] font-bold bg-slate-50">
+                            <span>PÁG. 1 DE 2</span>
                         </div>
                     </div>
 
-                    <div class="text-[8px] text-slate-500 border-t border-slate-300 pt-1 flex justify-between mt-4">
-                        <span x-text="header.company + ' - Registro Fotográfico de Evidencia'"></span>
-                        <span>Fin del Informe Técnico</span>
+                    <!-- Cuadro Metadata Principal -->
+                    <div class="border border-slate-900 mb-3 text-[10px] w-full">
+                        <div class="bg-slate-200 font-bold px-3 py-1 border-b border-slate-900 text-slate-800 uppercase tracking-wide" x-text="header.area"></div>
+                        <div class="grid grid-cols-2 border-b border-slate-300">
+                            <div class="p-1.5 px-3 border-r border-slate-300 font-semibold">TURNO: <span class="font-normal uppercase" x-text="header.shift"></span></div>
+                            <div class="p-1.5 px-3 font-semibold">FECHA: <span class="font-normal" x-text="header.date"></span></div>
+                        </div>
+                        <div class="p-1.5 px-3 border-b border-slate-300 font-semibold bg-slate-50">
+                            SUPERVISOR A CARGO: <span class="font-normal uppercase" x-text="header.supervisor"></span>
+                        </div>
+                        <div class="p-1.5 px-3 font-semibold bg-teal-50/70 text-slate-900">
+                            DOTACIÓN / PERSONAL ASIGNADO: <span class="font-normal" x-text="header.workforce || 'No especificada'"></span>
+                        </div>
+                    </div>
+
+                    <!-- 1. Tabla de Equipos -->
+                    <div class="mb-3 avoid-break">
+                        <div class="bg-slate-900 text-white font-bold px-3 py-1 text-[10px] uppercase tracking-wide mb-1">1. Equipos y Maquinaria en Turno</div>
+                        <table class="w-full border-collapse border border-slate-400 text-[9px]">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-900 font-bold">
+                                    <th class="border border-slate-400 p-1 text-left w-1/4">EQUIPOS</th>
+                                    <th class="border border-slate-400 p-1 text-center w-24">COMBUSTIBLE</th>
+                                    <th class="border border-slate-400 p-1 text-center w-24">HORÓMETROS / KM</th>
+                                    <th class="border border-slate-400 p-1 text-center w-20">PRÓX. MANT.</th>
+                                    <th class="border border-slate-400 p-1 text-left">OBSERVACIONES</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template x-for="eq in equipmentList" :key="eq.name">
+                                    <tr>
+                                        <td class="border border-slate-300 p-1 font-semibold" x-text="eq.name"></td>
+                                        <td class="border border-slate-300 p-1 text-center">
+                                            <div class="flex justify-center space-x-1 text-[8px]">
+                                                <span :class="eq.fuel === '1/4' ? 'font-bold bg-slate-300 px-0.5 rounded text-slate-900' : 'text-slate-400'">1/4</span>
+                                                <span :class="eq.fuel === '1/2' ? 'font-bold bg-slate-300 px-0.5 rounded text-slate-900' : 'text-slate-400'">1/2</span>
+                                                <span :class="eq.fuel === '3/4' ? 'font-bold bg-slate-300 px-0.5 rounded text-slate-900' : 'text-slate-400'">3/4</span>
+                                                <span :class="eq.fuel === 'Full' ? 'font-bold bg-slate-300 px-0.5 rounded text-slate-900' : 'text-slate-400'">Full</span>
+                                            </div>
+                                        </td>
+                                        <td class="border border-slate-300 p-1 text-center" x-text="eq.horometer"></td>
+                                        <td class="border border-slate-300 p-1 text-center" x-text="eq.nextMaint"></td>
+                                        <td class="border border-slate-300 p-1" x-text="eq.obs"></td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Nota Crítica -->
+                    <div class="bg-amber-50 border border-amber-300 text-amber-900 font-bold px-3 py-1 text-[9px] mb-3 avoid-break">
+                        NOTA: <span class="font-normal" x-text="header.note"></span>
+                    </div>
+
+                    <!-- 2. Tabla de Actividades -->
+                    <div class="mb-3 avoid-break">
+                        <div class="bg-slate-900 text-white font-bold px-3 py-1 text-[10px] uppercase tracking-wide mb-1">2. Actividades Realizadas</div>
+                        <table class="w-full border-collapse border border-slate-400 text-[9px]">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-900 font-bold">
+                                    <th class="border border-slate-400 p-1 text-center w-6">#</th>
+                                    <th class="border border-slate-400 p-1 text-left w-32">LUGAR ESPECÍFICO</th>
+                                    <th class="border border-slate-400 p-1 text-left">ACTIVIDAD REALIZADA</th>
+                                    <th class="border border-slate-400 p-1 text-center w-16">% AVANCE</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template x-for="(act, index) in activityList" :key="index">
+                                    <tr>
+                                        <td class="border border-slate-300 p-1 text-center font-bold" x-text="index + 1"></td>
+                                        <td class="border border-slate-300 p-1 font-semibold" x-text="act.location"></td>
+                                        <td class="border border-slate-300 p-1" x-text="act.description"></td>
+                                        <td class="border border-slate-300 p-1 text-center font-bold" x-text="act.progress + '%'"></td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- 3. Tabla de Instalaciones -->
+                    <div class="mb-3 avoid-break">
+                        <div class="bg-slate-900 text-white font-bold px-3 py-1 text-[10px] uppercase tracking-wide mb-1">3. Estado de Instalaciones de Faena / Sala de Cambio</div>
+                        <table class="w-full border-collapse border border-slate-400 text-[9px]">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-900 font-bold">
+                                    <th class="border border-slate-400 p-1 text-left w-1/3">ELEMENTOS</th>
+                                    <th class="border border-slate-400 p-1 text-center w-24">ESTADO</th>
+                                    <th class="border border-slate-400 p-1 text-left">OBSERVACIONES</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template x-for="fac in facilityList" :key="fac.element">
+                                    <tr>
+                                        <td class="border border-slate-300 p-1 font-semibold" x-text="fac.element"></td>
+                                        <td class="border border-slate-300 p-1 text-center font-bold" :class="fac.status === 'BUENO' ? 'text-emerald-700' : 'text-red-700'" x-text="fac.status"></td>
+                                        <td class="border border-slate-300 p-1" x-text="fac.obs"></td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
+                <!-- Bloque Inferior de Firmas Oficiales -->
+                <div class="avoid-break mt-2">
+                    <div class="grid grid-cols-2 gap-6 pt-4 border-t border-slate-300 text-center text-[9px]">
+                        <div class="px-4">
+                            <div class="h-8 border-b border-slate-400 mb-1"></div>
+                            <span class="font-bold uppercase block text-slate-900" x-text="header.supervisor"></span>
+                            <span class="text-slate-500">Supervisor Responsable (Entrega)</span>
+                        </div>
+                        <div class="px-4">
+                            <div class="h-8 border-b border-slate-400 mb-1"></div>
+                            <span class="font-bold uppercase block text-slate-900">V° B° / RECIBE TURNO</span>
+                            <span class="text-slate-500">Supervisor / Administración</span>
+                        </div>
+                    </div>
+                    <div class="text-[8px] text-slate-500 border-t border-slate-200 pt-1 flex justify-between mt-2">
+                        <span x-text="header.company + ' - Control Operacional de Turno'"></span>
+                        <span>Documento Digital Generado Oficial</span>
+                    </div>
+                </div>
             </div>
+
+            <!-- PÁGINA 2: ANEXO FOTOGRÁFICO -->
+            <div class="page-a4 text-slate-900 text-xs mt-4">
+                <div>
+                    <div class="border-2 border-slate-900 mb-4 grid grid-cols-12 bg-slate-50 text-center">
+                        <div class="col-span-9 p-2 border-r-2 border-slate-900 text-left">
+                            <span class="font-extrabold text-xs tracking-wider text-slate-900 uppercase block" x-text="header.company"></span>
+                            <span class="font-bold text-[10px] text-corporate uppercase">ANEXO FOTOGRÁFICO - REGISTRO DE TRABAJOS (ANTES / DESPUÉS)</span>
+                        </div>
+                        <div class="col-span-3 p-2 flex flex-col justify-center items-center text-[9px] font-bold">
+                            <span>PÁG. 2 DE 2</span>
+                            <span class="text-[8px] text-slate-500 font-normal" x-text="header.date"></span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <template x-for="(pair, index) in photoPairs" :key="index">
+                            <div class="border border-slate-400 rounded-lg p-2.5 bg-slate-50/50 avoid-break">
+                                <div class="flex justify-between items-center border-b border-slate-300 pb-1 mb-2">
+                                    <span class="font-bold text-slate-900 text-[10px]">COMPARATIVA N° <span x-text="index + 1"></span> - <span x-text="pair.location"></span></span>
+                                    <span class="text-slate-600 text-[9px]" x-text="pair.description"></span>
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div class="bg-white p-2 rounded border border-slate-300 text-center">
+                                        <div class="font-bold text-amber-700 text-[9px] mb-1"><i class="fa-solid fa-clock-rotate-left"></i> ANTES DE LA TAREA</div>
+                                        <div class="h-36 bg-slate-100 rounded border border-slate-200 flex items-center justify-center overflow-hidden mb-1">
+                                            <template x-if="pair.beforeImg"><img :src="pair.beforeImg" class="w-full h-full object-cover"></template>
+                                            <template x-if="!pair.beforeImg"><span class="text-slate-400 italic text-[9px]">Sin foto</span></template>
+                                        </div>
+                                        <p class="text-[9px] text-slate-600 italic truncate" x-text="pair.beforeNote || 'Estado previo'"></p>
+                                    </div>
+                                    <div class="bg-white p-2 rounded border border-slate-300 text-center">
+                                        <div class="font-bold text-emerald-700 text-[9px] mb-1"><i class="fa-solid fa-circle-check"></i> DESPUÉS DE LA TAREA</div>
+                                        <div class="h-36 bg-slate-100 rounded border border-slate-200 flex items-center justify-center overflow-hidden mb-1">
+                                            <template x-if="pair.afterImg"><img :src="pair.afterImg" class="w-full h-full object-cover"></template>
+                                            <template x-if="!pair.afterImg"><span class="text-slate-400 italic text-[9px]">Sin foto</span></template>
+                                        </div>
+                                        <p class="text-[9px] text-slate-600 italic truncate" x-text="pair.afterNote || 'Resultado final'"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <div class="text-[8px] text-slate-500 border-t border-slate-300 pt-1 flex justify-between mt-4">
+                    <span x-text="header.company + ' - Registro Fotográfico de Evidencia'"></span>
+                    <span>Fin del Informe Técnico</span>
+                </div>
+            </div>
+
         </div>
 
     </main>
@@ -576,7 +584,7 @@ html_code = """
     <script>
         function reportApp() {
             return {
-                activeTab: 'editor',
+                activeTab: 'preview',
                 notification: false,
                 notificationText: '',
                 
@@ -632,4 +640,36 @@ html_code = """
                 addActivity() { this.activityList.push({ location: '', description: '', progress: 100 }); this.showNotification('Actividad agregada'); },
                 removeActivity(index) { this.activityList.splice(index, 1); },
 
-                addFacility() { this.facilityList.push({ element: '', status: 'BUENO
+                addFacility() { this.facilityList.push({ element: '', status: 'BUENO', obs: '' }); this.showNotification('Elemento agregado'); },
+                removeFacility(index) { this.facilityList.splice(index, 1); },
+
+                addPhotoPair() { this.photoPairs.push({ location: '', description: '', beforeImg: '', beforeNote: '', afterImg: '', afterNote: '' }); this.showNotification('Comparativa agregada'); },
+                removePhotoPair(index) { this.photoPairs.splice(index, 1); },
+
+                handleImageUpload(event, index, field) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            this.photoPairs[index][field] = e.target.result;
+                            this.showNotification('Fotografía cargada correctamente');
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                },
+
+                exportPDF() {
+                    this.activeTab = 'preview';
+                    this.showNotification('Abriendo diálogo de impresión oficial...');
+                    setTimeout(() => {
+                        window.print();
+                    }, 300);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
+"""
+
+components.html(html_code, height=1350, scrolling=True)
