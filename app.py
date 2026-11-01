@@ -1,8 +1,6 @@
-
 import streamlit as st
 import streamlit.components.v1 as components
 
-# Configuración de la página en Streamlit
 st.set_page_config(
     page_title="Mining Report Pro - Control de Turno",
     page_icon="⛏️",
@@ -10,8 +8,8 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Bloque HTML optimizado sin conflictos de comillas en Python
-html_code = r"""
+# Bloque 1 de la interfaz HTML y estilos
+part1 = """
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -20,9 +18,7 @@ html_code = r"""
     <title>Generador de Informes Técnicos - Industrial Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- html2pdf.js para exportación a PDF de múltiples páginas -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <!-- Alpine.js para interactividad reactiva -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
@@ -55,7 +51,6 @@ html_code = r"""
 </head>
 <body class="bg-industrialBg text-slate-800 antialiased min-h-screen flex flex-col justify-between" x-data="reportApp()">
 
-    <!-- Header Principal -->
     <header class="no-print bg-petroleum text-white shadow-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-3">
             <div class="flex items-center space-x-3">
@@ -81,7 +76,6 @@ html_code = r"""
         </div>
     </header>
 
-    <!-- Notificación flotante -->
     <div x-show="notification" x-transition class="no-print fixed bottom-5 right-5 z-50 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center space-x-3 border-l-4 border-corporate">
         <i class="fa-solid fa-circle-check text-corporate text-lg"></i>
         <span class="text-xs sm:text-sm font-medium" x-text="notificationText"></span>
@@ -89,10 +83,8 @@ html_code = r"""
 
     <main class="max-w-7xl mx-auto px-2 sm:px-4 py-6 w-full flex-grow">
         
-        <!-- VISTA 1: EDITOR DE DATOS -->
         <div x-show="activeTab === 'editor'" class="no-print space-y-6">
             
-            <!-- Datos de Empresa y Dotación -->
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-6">
                 <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
                     <h2 class="text-sm sm:text-base font-bold text-petroleum flex items-center space-x-2">
@@ -125,7 +117,6 @@ html_code = r"""
                         <label class="block text-xs font-semibold text-slate-600 mb-1">Supervisor / Responsable</label>
                         <input type="text" x-model="header.supervisor" class="w-full text-xs sm:text-sm border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-corporate focus:outline-none">
                     </div>
-                    <!-- DOTACIÓN / PERSONAL ASIGNADO -->
                     <div class="sm:col-span-2 lg:col-span-3 bg-teal-50/60 border border-teal-200 p-3 rounded-lg">
                         <label class="block text-xs font-bold text-corporateDark mb-1 flex items-center space-x-1.5">
                             <i class="fa-solid fa-users text-corporate"></i>
@@ -140,7 +131,6 @@ html_code = r"""
                 </div>
             </div>
 
-            <!-- Equipos y Maquinaria -->
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-6">
                 <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
                     <h2 class="text-sm sm:text-base font-bold text-petroleum flex items-center space-x-2">
@@ -183,7 +173,6 @@ html_code = r"""
                 </div>
             </div>
 
-            <!-- Actividades Realizadas -->
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-6">
                 <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
                     <h2 class="text-sm sm:text-base font-bold text-petroleum flex items-center space-x-2">
@@ -220,7 +209,6 @@ html_code = r"""
                 </div>
             </div>
 
-            <!-- Estado de Instalaciones -->
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-6">
                 <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
                     <h2 class="text-sm sm:text-base font-bold text-petroleum flex items-center space-x-2">
@@ -261,7 +249,6 @@ html_code = r"""
                 </div>
             </div>
 
-            <!-- Anexo Fotográfico -->
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-6">
                 <div class="flex flex-wrap items-center justify-between gap-2 pb-3 mb-4 border-b border-slate-100">
                     <div>
@@ -296,7 +283,6 @@ html_code = r"""
                             </div>
 
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-200">
-                                <!-- ANTES -->
                                 <div class="bg-white p-3 rounded-lg border border-slate-200">
                                     <label class="block text-xs font-bold text-amber-700 mb-1.5"><i class="fa-solid fa-clock-rotate-left"></i> FOTO ANTES</label>
                                     <div class="flex items-center space-x-3">
@@ -310,7 +296,6 @@ html_code = r"""
                                         </div>
                                     </div>
                                 </div>
-                                <!-- DESPUÉS -->
                                 <div class="bg-white p-3 rounded-lg border border-slate-200">
                                     <label class="block text-xs font-bold text-emerald-700 mb-1.5"><i class="fa-solid fa-circle-check"></i> FOTO DESPUÉS</label>
                                     <div class="flex items-center space-x-3">
@@ -330,12 +315,13 @@ html_code = r"""
                 </div>
             </div>
         </div>
+"""
 
-        <!-- VISTA 2: PREVIEW E IMPRESIÓN PDF -->
+# Bloque 2 de la interfaz HTML, Vista previa PDF y Lógica JavaScript
+part2 = """
         <div class="flex justify-center w-full overflow-x-auto">
             <div id="full-report-container" class="bg-white p-6 shadow-2xl border border-slate-300 text-slate-900 text-xs my-2 print-page" style="width: 210mm; min-h: 297mm; box-sizing: border-box;">
                 
-                <!-- PÁGINA 1 -->
                 <div class="flex flex-col justify-between min-h-[265mm]">
                     <div>
                         <div class="border-2 border-slate-800 mb-3 grid grid-cols-12 text-center">
@@ -367,7 +353,6 @@ html_code = r"""
                             </div>
                         </div>
 
-                        <!-- 1. Equipos -->
                         <div class="mb-3 avoid-break">
                             <div class="bg-slate-800 text-white font-bold px-3 py-1 text-[10px] uppercase tracking-wide mb-1">1. Equipos y Maquinaria en Turno</div>
                             <table class="w-full border-collapse border border-slate-400 text-[9px]">
@@ -405,7 +390,6 @@ html_code = r"""
                             NOTA: <span class="font-normal" x-text="header.note"></span>
                         </div>
 
-                        <!-- 2. Actividades -->
                         <div class="mb-3 avoid-break">
                             <div class="bg-slate-800 text-white font-bold px-3 py-1 text-[10px] uppercase tracking-wide mb-1">2. Actividades Realizadas</div>
                             <table class="w-full border-collapse border border-slate-400 text-[9px]">
@@ -430,7 +414,6 @@ html_code = r"""
                             </table>
                         </div>
 
-                        <!-- 3. Instalaciones -->
                         <div class="mb-3 avoid-break">
                             <div class="bg-slate-800 text-white font-bold px-3 py-1 text-[10px] uppercase tracking-wide mb-1">3. Estado de Instalaciones de Faena / Sala de Cambio</div>
                             <table class="w-full border-collapse border border-slate-400 text-[9px]">
@@ -462,7 +445,6 @@ html_code = r"""
 
                 <div class="force-page-break pt-4"></div>
 
-                <!-- PÁGINA 2: ANEXO FOTOGRÁFICO -->
                 <div class="flex flex-col justify-between min-h-[265mm]">
                     <div>
                         <div class="border-2 border-slate-800 mb-4 grid grid-cols-12 bg-slate-50 text-center">
@@ -599,3 +581,39 @@ html_code = r"""
                     const element = document.getElementById('full-report-container');
                     const originalClass = element.className;
                     element.classList.add('pdf-render-mode');
+
+                    const opt = {
+                        margin: [8, 8, 8, 8],
+                        filename: `Informe_Turno_${this.header.date}.pdf`,
+                        image: { type: 'jpeg', quality: 0.98 },
+                        html2canvas: { scale: 2, useCORS: true, logging: false, scrollY: 0, windowWidth: 1024 },
+                        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                        pagebreak: { mode: ['css', 'legacy'] }
+                    };
+
+                    html2pdf().set(opt).from(element).save().then(() => {
+                        element.className = originalClass;
+                        this.showNotification('¡PDF descargado con éxito sin recortes!');
+                    }).catch(err => {
+                        element.className = originalClass;
+                        console.error('Error generando PDF:', err);
+                        this.showNotification('Error al exportar.');
+                    });
+                }
+            }
+        }
+    </script>
+</body>
+</html>
+"""
+
+# Unir las dos partes de forma segura en un archivo HTML local
+with open("index.html", "w", encoding="utf-8") as f:
+    f.write(part1)
+    f.write(part2)
+
+# Leer y renderizar el archivo integrado en Streamlit
+with open("index.html", "r", encoding="utf-8") as f:
+    html_code = f.read()
+
+components.html(html_code, height=1350, scrolling=True)
