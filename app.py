@@ -1,3 +1,4 @@
+
 import streamlit as st
 import streamlit.components.v1 as components
 
@@ -9,8 +10,8 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Código HTML/JS integrado para ejecución perfecta en Streamlit Cloud y Celular
-html_code = """
+# Bloque HTML optimizado sin conflictos de comillas en Python
+html_code = r"""
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -40,43 +41,16 @@ html_code = """
     </script>
     <style>
         body { font-family: 'Inter', sans-serif; }
-        
         @media print {
             .no-print { display: none !important; }
             body { background: white !important; margin: 0; padding: 0; }
-            .print-page {
-                box-shadow: none !important;
-                border: none !important;
-                width: 100% !important;
-                max-width: 100% !important;
-                margin: 0 !important;
-                padding: 10mm !important;
-                page-break-after: always;
-            }
-            .avoid-break {
-                page-break-inside: avoid !important;
-                break-inside: avoid !important;
-            }
-            .force-page-break {
-                page-break-before: always !important;
-                break-before: page !important;
-            }
+            .print-page { box-shadow: none !important; border: none !important; width: 100% !important; max-width: 100% !important; margin: 0 !important; padding: 10mm !important; page-break-after: always; }
+            .avoid-break { page-break-inside: avoid !important; break-inside: avoid !important; }
+            .force-page-break { page-break-before: always !important; break-before: page !important; }
         }
-
-        .pdf-render-mode {
-            width: 794px !important;
-            box-sizing: border-box !important;
-        }
-
-        .avoid-break {
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
-        }
-
-        .force-page-break {
-            page-break-before: always !important;
-            break-before: page !important;
-        }
+        .pdf-render-mode { width: 794px !important; box-sizing: border-box !important; }
+        .avoid-break { page-break-inside: avoid !important; break-inside: avoid !important; }
+        .force-page-break { page-break-before: always !important; break-before: page !important; }
     </style>
 </head>
 <body class="bg-industrialBg text-slate-800 antialiased min-h-screen flex flex-col justify-between" x-data="reportApp()">
@@ -444,4 +418,184 @@ html_code = """
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <template
+                                    <template x-for="(act, index) in activityList" :key="index">
+                                        <tr>
+                                            <td class="border border-slate-300 p-1 text-center font-bold" x-text="index + 1"></td>
+                                            <td class="border border-slate-300 p-1 font-semibold" x-text="act.location"></td>
+                                            <td class="border border-slate-300 p-1" x-text="act.description"></td>
+                                            <td class="border border-slate-300 p-1 text-center font-bold" x-text="act.progress + '%'"></td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- 3. Instalaciones -->
+                        <div class="mb-3 avoid-break">
+                            <div class="bg-slate-800 text-white font-bold px-3 py-1 text-[10px] uppercase tracking-wide mb-1">3. Estado de Instalaciones de Faena / Sala de Cambio</div>
+                            <table class="w-full border-collapse border border-slate-400 text-[9px]">
+                                <thead>
+                                    <tr class="bg-slate-100 text-slate-800 font-bold">
+                                        <th class="border border-slate-400 p-1 text-left w-1/3">ELEMENTOS</th>
+                                        <th class="border border-slate-400 p-1 text-center w-24">ESTADO</th>
+                                        <th class="border border-slate-400 p-1 text-left">OBSERVACIONES</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template x-for="fac in facilityList" :key="fac.element">
+                                        <tr>
+                                            <td class="border border-slate-300 p-1 font-semibold" x-text="fac.element"></td>
+                                            <td class="border border-slate-300 p-1 text-center font-bold" :class="fac.status === 'BUENO' ? 'text-emerald-700' : 'text-red-700'" x-text="fac.status"></td>
+                                            <td class="border border-slate-300 p-1" x-text="fac.obs"></td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="text-[8px] text-slate-500 border-t border-slate-300 pt-1 flex justify-between mt-2">
+                        <span x-text="header.company + ' - Control Operacional de Turno'"></span>
+                        <span>Documento Digital Generado Oficial</span>
+                    </div>
+                </div>
+
+                <div class="force-page-break pt-4"></div>
+
+                <!-- PÁGINA 2: ANEXO FOTOGRÁFICO -->
+                <div class="flex flex-col justify-between min-h-[265mm]">
+                    <div>
+                        <div class="border-2 border-slate-800 mb-4 grid grid-cols-12 bg-slate-50 text-center">
+                            <div class="col-span-9 p-2 border-r-2 border-slate-800 text-left">
+                                <span class="font-extrabold text-xs tracking-wider text-slate-900 uppercase block" x-text="header.company"></span>
+                                <span class="font-bold text-[10px] text-corporate uppercase">ANEXO FOTOGRÁFICO - REGISTRO DE TRABAJOS (ANTES / DESPUÉS)</span>
+                            </div>
+                            <div class="col-span-3 p-2 flex flex-col justify-center items-center text-[9px] font-bold">
+                                <span>PÁG. 2 DE 2</span>
+                                <span class="text-[8px] text-slate-500 font-normal" x-text="header.date"></span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            <template x-for="(pair, index) in photoPairs" :key="index">
+                                <div class="border border-slate-400 rounded-lg p-2.5 bg-slate-50/50 avoid-break">
+                                    <div class="flex justify-between items-center border-b border-slate-300 pb-1 mb-2">
+                                        <span class="font-bold text-slate-800 text-[10px]">COMPARATIVA N° <span x-text="index + 1"></span> - <span x-text="pair.location"></span></span>
+                                        <span class="text-slate-600 text-[9px]" x-text="pair.description"></span>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div class="bg-white p-2 rounded border border-slate-300 text-center">
+                                            <div class="font-bold text-amber-700 text-[9px] mb-1"><i class="fa-solid fa-clock-rotate-left"></i> ANTES DE LA TAREA</div>
+                                            <div class="h-36 bg-slate-100 rounded border border-slate-200 flex items-center justify-center overflow-hidden mb-1">
+                                                <template x-if="pair.beforeImg"><img :src="pair.beforeImg" class="w-full h-full object-cover"></template>
+                                                <template x-if="!pair.beforeImg"><span class="text-slate-400 italic text-[9px]">Sin foto</span></template>
+                                            </div>
+                                            <p class="text-[9px] text-slate-600 italic truncate" x-text="pair.beforeNote || 'Estado previo'"></p>
+                                        </div>
+                                        <div class="bg-white p-2 rounded border border-slate-300 text-center">
+                                            <div class="font-bold text-emerald-700 text-[9px] mb-1"><i class="fa-solid fa-circle-check"></i> DESPUÉS DE LA TAREA</div>
+                                            <div class="h-36 bg-slate-100 rounded border border-slate-200 flex items-center justify-center overflow-hidden mb-1">
+                                                <template x-if="pair.afterImg"><img :src="pair.afterImg" class="w-full h-full object-cover"></template>
+                                                <template x-if="!pair.afterImg"><span class="text-slate-400 italic text-[9px]">Sin foto</span></template>
+                                            </div>
+                                            <p class="text-[9px] text-slate-600 italic truncate" x-text="pair.afterNote || 'Resultado final'"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <div class="text-[8px] text-slate-500 border-t border-slate-300 pt-1 flex justify-between mt-4">
+                        <span x-text="header.company + ' - Registro Fotográfico de Evidencia'"></span>
+                        <span>Fin del Informe Técnico</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        function reportApp() {
+            return {
+                activeTab: 'editor',
+                notification: false,
+                notificationText: '',
+                
+                header: {
+                    company: 'CODELCO - DIVISIÓN TENIENTE',
+                    title: 'INFORME ENTREGA DE TURNO DIARIO',
+                    area: 'ÁREA CHANCADO SECUNDARIO - TERCIARIO',
+                    shift: 'TURNO: B, NOCHE',
+                    date: new Date().toISOString().split('T')[0],
+                    supervisor: 'HERNAN GONZALO TRONCOSO OÑATE',
+                    workforce: '14 Personas (4 Operadores Aspirador, 2 Cargador, 7 Aseo, 1 APR)',
+                    note: 'REVISAR AIRE ACONDICIONADO DE SALA CAMBIO, OFICINA Y SALA REUNIONES'
+                },
+
+                equipmentList: [
+                    { name: 'Camión aspirador 12', fuel: '3/4', horometer: '5853 / 5861', nextMaint: '4270', obs: 'Equipo operativo, recarga combustible.' },
+                    { name: 'Camión aspirador 34', fuel: 'Full', horometer: '12693 / 12670', nextMaint: '12740', obs: 'Equipo Operativo, combustible 140 LTS.' },
+                    { name: 'Mini cargador 450', fuel: '1/2', horometer: '2212.6 / 2214.6', nextMaint: '2500.0', obs: 'Equipo operativo.' },
+                    { name: 'Camioneta VPBW 16', fuel: 'Full', horometer: '9633.1 / 9', nextMaint: '10.000', obs: 'Equipo operativo.' }
+                ],
+
+                activityList: [
+                    { location: 'CT 135 C', description: 'LIMPIEZA MANUAL SECTOR PASILLO IZQUIERDO', progress: 100 },
+                    { location: 'CH 2°, 3°', description: 'HUMECTACION DE CAMINOS 2 VECES (APOYO PRIMARIO)', progress: 100 },
+                    { location: 'SILICA', description: 'LIMPIEZA MANUAL SECTOR PARRILLA Y ACCESO', progress: 100 }
+                ],
+
+                facilityList: [
+                    { element: 'CASILLEROS', status: 'BUENO', obs: 'OPERATIVO' },
+                    { element: 'DUCHAS', status: 'BUENO', obs: 'OPERATIVO' },
+                    { element: 'BAÑOS (WC)', status: 'BUENO', obs: 'Mantener puerta cerrada' },
+                    { element: 'URINARIOS', status: 'BUENO', obs: 'OK' }
+                ],
+
+                photoPairs: [
+                    {
+                        location: 'CT 135 C',
+                        description: 'Limpieza de pasillo principal y retiro de material acumulado.',
+                        beforeImg: '', beforeNote: 'Acumulación de mineral en sector pasillo.',
+                        afterImg: '', afterNote: 'Sector despejado y limpio conforme a norma.'
+                    }
+                ],
+
+                showNotification(msg) {
+                    this.notificationText = msg;
+                    this.notification = true;
+                    setTimeout(() => { this.notification = false; }, 3000);
+                },
+
+                addEquipment() { this.equipmentList.push({ name: '', fuel: 'Full', horometer: '', nextMaint: '', obs: '' }); this.showNotification('Equipo agregado'); },
+                removeEquipment(index) { this.equipmentList.splice(index, 1); },
+
+                addActivity() { this.activityList.push({ location: '', description: '', progress: 100 }); this.showNotification('Actividad agregada'); },
+                removeActivity(index) { this.activityList.splice(index, 1); },
+
+                addFacility() { this.facilityList.push({ element: '', status: 'BUENO', obs: '' }); this.showNotification('Elemento agregado'); },
+                removeFacility(index) { this.facilityList.splice(index, 1); },
+
+                addPhotoPair() { this.photoPairs.push({ location: '', description: '', beforeImg: '', beforeNote: '', afterImg: '', afterNote: '' }); this.showNotification('Comparativa agregada'); },
+                removePhotoPair(index) { this.photoPairs.splice(index, 1); },
+
+                handleImageUpload(event, index, field) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            this.photoPairs[index][field] = e.target.result;
+                            this.showNotification('Fotografía cargada correctamente');
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                },
+
+                exportPDF() {
+                    this.showNotification('Generando PDF completo de alta calidad...');
+                    const element = document.getElementById('full-report-container');
+                    const originalClass = element.className;
+                    element.classList.add('pdf-render-mode');
